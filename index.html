@@ -3,8 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Registered Accounts Room Tracker</title>
-<meta name="description" content="Track TFSA, RRSP and FHSA contribution room for your whole household, across every bank and brokerage. Private: your numbers stay on your phone.">
+<title>TFSA, RRSP &amp; FHSA Contribution Room Tracker (Canada) | Room Tracker</title>
+<meta name="description" content="Free TFSA, RRSP and FHSA contribution room tracker for Canadians. See how much room you and your spouse have left in 2026 across TD, RBC, Questrade, Wealthsimple and more — and avoid CRA over-contribution penalties. No sign-up; data stays on your phone.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TFSA, RRSP & FHSA Room Tracker — see your room left for 2026">
+<meta property="og:description" content="Track TFSA, RRSP and FHSA contribution room for your household across every bank. Free, private, no sign-up.">
+<meta property="og:image" content="/og.png">
+<meta property="og:locale" content="en_CA">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "name": "Registered Accounts Room Tracker", "alternateName": "RoomLeft", "applicationCategory": "FinanceApplication", "operatingSystem": "iOS, Android, Web", "description": "Free TFSA, RRSP and FHSA contribution room tracker for Canadians. Track room for your whole household across every bank and brokerage.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "CAD"}, "inLanguage": "en-CA", "areaServed": "CA"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How much TFSA room do I have in 2026?", "acceptedAnswer": {"@type": "Answer", "text": "The TFSA dollar limit for 2026 is $7,000. If you have been eligible since 2009 and never contributed, your total room is $109,000. Your own room is that total, minus what you have contributed, plus anything you withdrew in earlier years. CRA My Account shows it, but it can lag months behind recent deposits."}}, {"@type": "Question", "name": "What is the RRSP contribution limit for 2026?", "acceptedAnswer": {"@type": "Answer", "text": "Your 2026 RRSP limit is 18% of your 2025 earned income, up to a maximum of $33,810, plus unused room from earlier years, minus any pension adjustment. Your exact figure is on your Notice of Assessment. The deadline for the 2026 tax year is March 1, 2027. The 2027 dollar limit is $35,390."}}, {"@type": "Question", "name": "How does FHSA contribution room work?", "acceptedAnswer": {"@type": "Answer", "text": "A First Home Savings Account gives $8,000 of room a year, up to $40,000 over your lifetime. Up to $8,000 of unused room carries forward to the next year. Room starts only once you open the account, and contributions must be made by December 31 — there is no 60-day grace period."}}, {"@type": "Question", "name": "Why is my CRA contribution room wrong?", "acceptedAnswer": {"@type": "Answer", "text": "Banks and brokerages report your TFSA and RRSP contributions to CRA after the year ends, so the room shown in CRA My Account usually doesn't include this year's deposits. Room Tracker keeps a live count by logging each contribution as you make it."}}, {"@type": "Question", "name": "What happens if I over-contribute to my TFSA, RRSP or FHSA?", "acceptedAnswer": {"@type": "Answer", "text": "CRA charges 1% a month on the highest excess amount in a TFSA or FHSA for every month it stays over. RRSPs allow a $2,000 lifetime buffer before the 1% monthly tax applies. Withdrawing the excess quickly stops the penalty growing."}}, {"@type": "Question", "name": "Can I track my spouse's TFSA and RRSP too?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Add each person in your household and see everyone's TFSA, RRSP and FHSA room side by side, across TD, RBC, Questrade, Wealthsimple, BMO, Scotiabank, CIBC and any other institution."}}, {"@type": "Question", "name": "Is my financial data private?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. There is no sign-up and no bank login. Everything you enter is stored only on your own phone or computer and is never sent to a server."}}]}]}</script>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -86,6 +93,11 @@ td{border-bottom:1px solid var(--rule);padding:8px;vertical-align:middle}
 .toast button{min-height:32px;padding:0 10px;background:transparent;color:var(--bg);border-color:var(--bg)}
 textarea{width:100%;min-height:120px;font:13px/1.4 ui-monospace,monospace;padding:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
 h3{font-size:20px;margin:24px 0 8px}
+.faq{margin-top:36px;border-top:2px solid var(--ink);padding-top:8px;max-width:820px}
+.faq h2{font-size:22px;line-height:1.2;margin:14px 0 8px}
+.faq details{border-bottom:1px solid var(--rule)}
+.faq summary{cursor:pointer;font-weight:700;padding:12px 0;min-height:44px}
+.faq details p{margin:0 0 14px;max-width:70ch}
 .empty{padding:24px;color:var(--mute);background:var(--panel)}
 .setup{background:var(--panel);padding:clamp(20px,4vw,36px);max-width:720px}
 .setup h2{font-size:26px;margin:0 0 6px;line-height:1.2}
@@ -100,7 +112,7 @@ h3{font-size:20px;margin:24px 0 8px}
 </head>
 <body>
 <header class="band" style="padding-bottom:0"><div class="wrap">
-  <h1 id="headline">Room left for 2026</h1>
+  <h1 id="headline">TFSA, RRSP &amp; FHSA room tracker</h1>
   <p class="sub">TFSA, RRSP and FHSA room for your household, across every bank and brokerage. Your numbers stay on this device — nothing is sent anywhere.</p>
   <div class="install" id="inst" role="region" aria-label="Install"><span id="instMsg">Add Room Tracker to your home screen to use it like an app, even offline.</span><span style="display:flex;gap:8px"><button type="button" id="instBtn">Install</button><button type="button" class="x" id="instNo">Not now</button></span></div>
   <nav id="nav">
@@ -159,6 +171,17 @@ h3{font-size:20px;margin:24px 0 8px}
   </section>
 
   <p class="note">2026 limits: TFSA $7,000 · RRSP 18% of 2025 earned income up to $33,810 · FHSA $8,000 a year, $40,000 lifetime. Over-contributions to a TFSA or FHSA cost 1% a month on the excess; RRSP allows a $2,000 buffer before the 1% tax applies.</p>
+  <section class="faq" id="faq" aria-labelledby="faqh">
+    <h2 id="faqh">TFSA, RRSP and FHSA room: common questions</h2>
+    <details><summary>How much TFSA room do I have in 2026?</summary><p>The TFSA dollar limit for 2026 is $7,000. If you have been eligible since 2009 and never contributed, your total room is $109,000. Your own room is that total, minus what you have contributed, plus anything you withdrew in earlier years. CRA My Account shows it, but it can lag months behind recent deposits.</p></details>
+    <details><summary>What is the RRSP contribution limit for 2026?</summary><p>Your 2026 RRSP limit is 18% of your 2025 earned income, up to a maximum of $33,810, plus unused room from earlier years, minus any pension adjustment. Your exact figure is on your Notice of Assessment. The deadline for the 2026 tax year is March 1, 2027. The 2027 dollar limit is $35,390.</p></details>
+    <details><summary>How does FHSA contribution room work?</summary><p>A First Home Savings Account gives $8,000 of room a year, up to $40,000 over your lifetime. Up to $8,000 of unused room carries forward to the next year. Room starts only once you open the account, and contributions must be made by December 31 — there is no 60-day grace period.</p></details>
+    <details><summary>Why is my CRA contribution room wrong?</summary><p>Banks and brokerages report your TFSA and RRSP contributions to CRA after the year ends, so the room shown in CRA My Account usually doesn&#x27;t include this year&#x27;s deposits. Room Tracker keeps a live count by logging each contribution as you make it.</p></details>
+    <details><summary>What happens if I over-contribute to my TFSA, RRSP or FHSA?</summary><p>CRA charges 1% a month on the highest excess amount in a TFSA or FHSA for every month it stays over. RRSPs allow a $2,000 lifetime buffer before the 1% monthly tax applies. Withdrawing the excess quickly stops the penalty growing.</p></details>
+    <details><summary>Can I track my spouse&#x27;s TFSA and RRSP too?</summary><p>Yes. Add each person in your household and see everyone&#x27;s TFSA, RRSP and FHSA room side by side, across TD, RBC, Questrade, Wealthsimple, BMO, Scotiabank, CIBC and any other institution.</p></details>
+    <details><summary>Is my financial data private?</summary><p>Yes. There is no sign-up and no bank login. Everything you enter is stored only on your own phone or computer and is never sent to a server.</p></details>
+    <p class="note">General information for Canadians, not tax advice. Confirm your room with CRA.</p>
+  </section>
 </div></main>
 
 <div class="toast" id="toast" role="status"><span id="tmsg"></span><button id="undo" type="button">Undo</button></div>
@@ -219,7 +242,7 @@ function acctBlock(name,c,extra){
 function renderRoom(){
   const none=!S.people.length;
   $('#setup').hidden=!none;$('#addP').parentElement.hidden=none;
-  if(none){$('#people').innerHTML='';$('#headline').textContent='Set up your room tracker';$('#sampleNote').style.display='none';return}
+  if(none){$('#people').innerHTML='';$('#headline').textContent='TFSA, RRSP & FHSA room tracker';$('#sampleNote').style.display='none';return}
   let total=0;
   $('#people').innerHTML=S.people.map(p=>{
     const c=calc(p);

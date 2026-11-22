@@ -135,7 +135,8 @@ h3{font-size:20px;margin:24px 0 8px}
       <div><label for="tt">Type</label><select id="tt"><option value="c">Contribution</option><option value="w">Withdrawal</option></select></div>
       <div><label for="tm">Amount ($)</label><input id="tm" class="num" type="number" min="0" step="0.01" inputmode="decimal" required></div>
       <div><label for="td">Date</label><input id="td" type="date" required></div>
-      <div><label for="ti">Where</label><select id="ti"><option>Questrade</option><option>TD</option><option>RBC</option><option>iA</option><option>Wealthsimple</option><option>Other</option></select></div>
+      <div><label for="ti">Where</label><select id="ti"></select></div>
+      <div id="tiow" hidden><label for="tio">Institution name</label><input id="tio" type="text" maxlength="40" placeholder="e.g. Scotiabank" autocomplete="off"></div>
       <div><button type="submit">Add</button></div>
     </form>
     <div id="txlist" style="margin-top:18px"></div>
@@ -248,7 +249,16 @@ function renderRoom(){
   $('#sampleNote').style.display=S.sample?'':'none';
 }
 
+const INST=['Questrade','TD','RBC','iA','Wealthsimple','BMO','Scotiabank','CIBC','National Bank'];
+function renderInst(){
+  const cur=$('#ti').value;
+  const custom=[...new Set(S.tx.map(t=>t.i))].filter(x=>x&&!INST.includes(x)).sort();
+  $('#ti').innerHTML=[...INST,...custom].map(x=>`<option>${esc(x)}</option>`).join('')+'<option value="__other">Other…</option>';
+  if(cur&&[...$('#ti').options].some(o=>o.value===cur))$('#ti').value=cur;
+  $('#tiow').hidden=$('#ti').value!=='__other';
+}
 function renderLog(){
+  renderInst();
   $('#tp').innerHTML=S.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   const name=id=>S.people.find(p=>p.id===id)?.name||'—';
   const rows=[...S.tx].sort((a,b)=>b.d.localeCompare(a.d));
@@ -310,9 +320,14 @@ $('#addP').addEventListener('click',()=>{S.people.push(blank(S.people.length===1
   const c=[...document.querySelectorAll('.card')].pop();c.querySelector('details').open=true;c.querySelector('h2 input').select();});
 
 $('#td').value=new Date().toISOString().slice(0,10);
+$('#ti').addEventListener('change',()=>{const o=$('#ti').value==='__other';$('#tiow').hidden=!o;if(o)$('#tio').focus()});
 $('#txf').addEventListener('submit',e=>{e.preventDefault();const amt=+$('#tm').value;if(!(amt>0))return;
-  S.tx.push({id:uid(),pid:$('#tp').value,a:$('#ta').value,t:$('#tt').value,amt,d:$('#td').value,i:$('#ti').value});
-  S.sample=false;save();const keep=$('#tp').value;renderAll();$('#tp').value=keep;$('#tm').value='';toast('Added');});
+  let inst=$('#ti').value;
+  if(inst==='__other'){inst=$('#tio').value.trim();if(!inst){$('#tio').focus();toast('Enter the institution name');return}
+    const hit=INST.find(x=>x.toLowerCase()===inst.toLowerCase());if(hit)inst=hit;}
+  S.tx.push({id:uid(),pid:$('#tp').value,a:$('#ta').value,t:$('#tt').value,amt,d:$('#td').value,i:inst});
+  $('#tio').value='';
+  S.sample=false;save();const keep=$('#tp').value;renderAll();$('#tp').value=keep;$('#ti').value=inst;$('#tiow').hidden=true;$('#tm').value='';toast('Added');});
 $('#txlist').addEventListener('click',e=>{const id=e.target.dataset.rm;if(!id)return;
   const i=S.tx.findIndex(t=>t.id===id),t=S.tx[i];S.tx.splice(i,1);save();renderAll();toast('Deleted',()=>S.tx.splice(i,0,t));});
 

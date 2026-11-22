@@ -25,6 +25,7 @@
 :root{color-scheme:light dark;--bg:light-dark(#e7e4df,#171513);--panel:light-dark(#fff,#221f1c);--ink:light-dark(#111,#f1ede7);--mute:light-dark(#5d5853,#a59f97);--rule:light-dark(#d3cec7,#3a3531);--brick:#c8371e;--ok:light-dark(#111,#f1ede7);--track:light-dark(#ece8e2,#2e2a26)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Schibsted Grotesk",system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(18px,3vw,36px) max(5vw,16px,env(safe-area-inset-right)) clamp(18px,3vw,36px) max(5vw,16px,env(safe-area-inset-left))}
 header.band{padding-top:max(clamp(18px,3vw,36px),env(safe-area-inset-top))}
@@ -86,6 +87,13 @@ td{border-bottom:1px solid var(--rule);padding:8px;vertical-align:middle}
 textarea{width:100%;min-height:120px;font:13px/1.4 ui-monospace,monospace;padding:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
 h3{font-size:20px;margin:24px 0 8px}
 .empty{padding:24px;color:var(--mute);background:var(--panel)}
+.setup{background:var(--panel);padding:clamp(20px,4vw,36px);max-width:720px}
+.setup h2{font-size:26px;margin:0 0 6px;line-height:1.2}
+.setup p{margin:0 0 18px;color:var(--mute)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.choices button{min-height:64px;font-size:17px;text-align:left;padding:12px 16px}
+.choices button small{display:block;font-weight:400;font-size:13px;opacity:.75}
+.card h2 .x{flex:none;font-size:14px}
 @media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 8px;padding-inline-start:8.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}.date{grid-template-columns:minmax(0,1fr) auto}.date .t{grid-column:1/-1;order:3}.fields{grid-template-columns:minmax(0,1fr) 120px}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
@@ -106,6 +114,15 @@ h3{font-size:20px;margin:24px 0 8px}
 
 <main class="band"><div class="wrap">
   <section class="view" id="v-room">
+    <div class="setup" id="setup" hidden>
+      <h2>Who are you tracking?</h2>
+      <p>You can add or remove people any time. Everything stays on this device.</p>
+      <div class="choices">
+        <button type="button" data-start="1">Just me<small>One person</small></button>
+        <button type="button" data-start="2">Me and my spouse<small>Two people, side by side</small></button>
+        <button type="button" class="ghost" data-start="sample">Show me an example<small>Sample numbers to explore</small></button>
+      </div>
+    </div>
     <div class="people" id="people"></div>
     <div class="toolbar"><button class="ghost" id="addP" type="button">+ Add person</button></div>
     <p class="note" id="sampleNote">Sample numbers are filled in. Open “Starting numbers” on each card and replace them with the figures from CRA My Account or your Notice of Assessment.</p>
@@ -136,7 +153,7 @@ h3{font-size:20px;margin:24px 0 8px}
 
   <section class="view" id="v-data">
     <p style="margin-top:0;max-width:70ch">Your numbers live only in this browser. Copy a backup to keep somewhere safe, or paste one to restore it on another device.</p>
-    <div class="toolbar"><button id="copyB" type="button">Copy backup</button><button class="ghost" id="restB" type="button">Restore from pasted backup</button><button class="ghost" id="resetB" type="button">Reset to sample</button></div>
+    <div class="toolbar"><button id="copyB" type="button">Copy backup</button><button class="ghost" id="restB" type="button">Restore from pasted backup</button><button class="ghost" id="freshB" type="button">Start fresh</button><button class="ghost" id="resetB" type="button">Load sample numbers</button></div>
     <textarea id="bk" aria-label="Backup data" placeholder="Paste a backup here, then press Restore"></textarea>
   </section>
 
@@ -169,7 +186,8 @@ const sample=()=>({sample:true,people:[
 
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!S||!Array.isArray(S.people))S=sample();
+if(!S||!Array.isArray(S.people))S={people:[],tx:[]};
+const blank=(name)=>({id:uid(),name,tfsaJan1:0,rrspLimit:0,fhsa:false,fhsaJan1:0,fhsaLife:0});
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 
 function calc(p){
@@ -198,6 +216,9 @@ function acctBlock(name,c,extra){
 }
 
 function renderRoom(){
+  const none=!S.people.length;
+  $('#setup').hidden=!none;$('#addP').parentElement.hidden=none;
+  if(none){$('#people').innerHTML='';$('#headline').textContent='Set up your room tracker';$('#sampleNote').style.display='none';return}
   let total=0;
   $('#people').innerHTML=S.people.map(p=>{
     const c=calc(p);
@@ -209,7 +230,7 @@ function renderRoom(){
       +`<div class="det" style="margin-top:4px">Counts contributions from Mar 3, 2026 to the Mar 1, 2027 deadline.${c.rrsp.early?` ${fmt(c.rrsp.early)} made Jan–Mar 2 2026 counted toward 2025.`:''}</div>`;
     const fExtra=p.fhsa?(c.fhsa.left<0?`<div class="warn">Over by ${fmt(-c.fhsa.left)} — 1% a month on the excess.</div>`:'')+`<div class="det" style="margin-top:4px">Lifetime room left: <b>${fmt(c.fhsa.life)}</b> of $40,000 · contribute by Dec 31</div>`:'';
     return `<article class="card" data-p="${p.id}">
-      <h2><input value="${esc(p.name)}" data-f="name" aria-label="Person's name"></h2>
+      <h2><input value="${esc(p.name)}" data-f="name" aria-label="Person's name">${S.people.length>1?`<button class="x" type="button" data-del="${p.id}" aria-label="Remove ${esc(p.name)}">Remove</button>`:''}</h2>
       ${acctBlock('TFSA',c.tfsa,tExtra)}
       ${acctBlock('RRSP',c.rrsp,rExtra)}
       ${p.fhsa?acctBlock('FHSA',c.fhsa,fExtra):''}
@@ -221,7 +242,6 @@ function renderRoom(){
           ${p.fhsa?`<label for="d${p.id}">FHSA room on Jan 1, 2026</label><input id="d${p.id}" class="num" type="number" inputmode="numeric" data-f="fhsaJan1" value="${p.fhsaJan1}">
           <label for="e${p.id}">FHSA contributed before 2026</label><input id="e${p.id}" class="num" type="number" inputmode="numeric" data-f="fhsaLife" value="${p.fhsaLife}">`:''}
         </div>
-        ${S.people.length>1?`<button class="x" type="button" data-del="${p.id}" style="margin-top:10px">Remove ${esc(p.name)}</button>`:''}
       </details>
     </article>`}).join('');
   $('#headline').textContent=`${fmt(total)} of room left for 2026`;
@@ -286,7 +306,7 @@ $('#people').addEventListener('click',e=>{const id=e.target.dataset.del;if(!id)r
   const i=S.people.findIndex(p=>p.id===id),p=S.people[i],tx=S.tx.filter(t=>t.pid===id);
   S.people.splice(i,1);S.tx=S.tx.filter(t=>t.pid!==id);save();renderAll();
   toast(`Removed ${p.name}`,()=>{S.people.splice(i,0,p);S.tx.push(...tx)});});
-$('#addP').addEventListener('click',()=>{S.people.push({id:uid(),name:'New person',tfsaJan1:0,rrspLimit:0,fhsa:false,fhsaJan1:0,fhsaLife:0});save();renderAll();
+$('#addP').addEventListener('click',()=>{S.people.push(blank(S.people.length===1?'Spouse':'New person'));save();renderAll();
   const c=[...document.querySelectorAll('.card')].pop();c.querySelector('details').open=true;c.querySelector('h2 input').select();});
 
 $('#td').value=new Date().toISOString().slice(0,10);
@@ -298,7 +318,11 @@ $('#txlist').addEventListener('click',e=>{const id=e.target.dataset.rm;if(!id)re
 
 $('#copyB').addEventListener('click',async()=>{const txt=JSON.stringify(S);$('#bk').value=txt;try{await navigator.clipboard.writeText(txt);toast('Backup copied')}catch(e){$('#bk').select();toast('Select the text below and copy it')}});
 $('#restB').addEventListener('click',()=>{try{const d=JSON.parse($('#bk').value);if(!Array.isArray(d.people)||!Array.isArray(d.tx))throw 0;const old=S;S=d;save();renderAll();toast('Restored',()=>{S=old})}catch(e){toast('That doesn’t look like a backup')}});
-$('#resetB').addEventListener('click',()=>{const old=S;S=sample();save();renderAll();toast('Reset to sample numbers',()=>{S=old})});
+$('#resetB').addEventListener('click',()=>{const old=S;S=sample();save();renderAll();location.hash='#room';toast('Sample numbers loaded',()=>{S=old})});
+$('#freshB').addEventListener('click',()=>{const old=S;S={people:[],tx:[]};save();renderAll();location.hash='#room';toast('Cleared — choose who to track',()=>{S=old})});
+$('#setup').addEventListener('click',e=>{const b=e.target.closest('[data-start]');if(!b)return;const v=b.dataset.start;
+  S=v==='sample'?sample():{people:v==='2'?[blank('You'),blank('Spouse')]:[blank('You')],tx:[]};save();renderAll();
+  if(v!=='sample'){const c=document.querySelector('.card');if(c){c.querySelector('details').open=true;c.querySelector('h2 input').select()}}});
 
 renderAll();show();
 

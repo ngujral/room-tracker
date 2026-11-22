@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Registered Accounts Room Tracker</title>
+<meta name="description" content="Track TFSA, RRSP and FHSA contribution room for your whole household, across every bank and brokerage. Private: your numbers stay on your phone.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#e7e4df" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171513" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Room Tracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, exact, like a well-kept household ledger; money facts stated plainly
+   IDEA: the CRA contribution-room worksheet, redone as a ruled ledger with live meters
+   PICTURE: per-person room meters for TFSA, RRSP and FHSA, filled by what's already contributed
+   COLOUR and TYPE: stone ground, black ink, brick for warnings and overage, white panels; Schibsted Grotesk
+   LAYOUT: tab row (Room, Log, Placement, Dates), person cards side by side, stacking on phones */
+:root{color-scheme:light dark;--bg:light-dark(#e7e4df,#171513);--panel:light-dark(#fff,#221f1c);--ink:light-dark(#111,#f1ede7);--mute:light-dark(#5d5853,#a59f97);--rule:light-dark(#d3cec7,#3a3531);--brick:#c8371e;--ok:light-dark(#111,#f1ede7);--track:light-dark(#ece8e2,#2e2a26)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Schibsted Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(18px,3vw,36px) max(5vw,16px,env(safe-area-inset-right)) clamp(18px,3vw,36px) max(5vw,16px,env(safe-area-inset-left))}
+header.band{padding-top:max(clamp(18px,3vw,36px),env(safe-area-inset-top))}
+main.band{padding-bottom:max(36px,env(safe-area-inset-bottom))}
+.install{display:none;background:var(--ink);color:var(--bg);padding:12px 16px;margin-top:14px;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:15px}
+.install.on{display:flex}.install button{background:var(--bg);color:var(--ink);border-color:var(--bg);min-height:40px}.install .x{color:var(--bg);border-color:var(--bg);background:transparent}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:clamp(28px,4.2vw,44px);line-height:1.05;margin:0;font-weight:800;text-wrap:balance}
+.sub{color:var(--mute);margin:6px 0 0}
+nav{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-top:18px;overflow-x:auto}
+nav a{flex:none;padding:10px 16px;min-height:44px;color:var(--mute);text-decoration:none;font-weight:700;border-bottom:4px solid transparent;margin-bottom:-2px}
+nav a.on{color:var(--ink);border-color:var(--brick)}
+nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--brick);outline-offset:2px}
+.view{display:none}.view.on{display:block}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:20px}
+.card{background:var(--panel);padding:20px}
+.card h2{font-size:24px;margin:0 0 2px;line-height:1.2;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h2 input{font:inherit;font-weight:800;border:0;border-bottom:1px dashed var(--rule);background:transparent;color:var(--ink);width:100%;padding:0}
+.acct{border-top:1px solid var(--rule);padding:14px 0 6px}
+.acct:first-of-type{border-top:2px solid var(--ink);margin-top:10px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.an{font-weight:700;font-size:17px}
+.left{font-size:clamp(24px,3vw,32px);font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.1}
+.left.bad{color:var(--brick)}
+.meter{height:12px;background:var(--track);margin:8px 0 6px;position:relative;overflow:hidden}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--ok)}
+.meter i.bad{background:var(--brick)}
+.det{font-size:14px;color:var(--mute)}
+.det b{color:var(--ink);font-weight:600}
+.warn{font-size:14px;color:var(--brick);font-weight:600;margin-top:4px}
+.insts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--mute);margin-top:4px}
+details.set{margin-top:12px;font-size:14px}
+details.set summary{cursor:pointer;color:var(--mute);min-height:32px}
+.fields{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:8px 10px;align-items:center;margin-top:8px}
+.fields label{font-size:14px}
+input,select{font:inherit;font-size:16px;padding:8px 10px;min-height:44px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:0;width:100%}
+input.num{text-align:right;font-variant-numeric:tabular-nums}
+button{font:inherit;font-weight:700;min-height:44px;padding:0 18px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;border-radius:0}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--rule);font-weight:500}
+button.x{min-height:36px;padding:0 10px;background:transparent;color:var(--mute);border:1px solid var(--rule);font-weight:500}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end;background:var(--panel);padding:16px}
+.form label{font-size:13px;color:var(--mute);display:block}
+table{width:100%;border-collapse:collapse;font-size:15px;background:var(--panel)}
+th{text-align:left;font-size:13px;color:var(--mute);font-weight:500;border-bottom:2px solid var(--ink);padding:8px}
+td{border-bottom:1px solid var(--rule);padding:8px;vertical-align:middle}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.neg{color:var(--brick)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:2px 8px;white-space:nowrap}
+.best{background:var(--ink);color:var(--bg)}.okay{border:1px solid var(--rule)}.avoid{background:var(--brick);color:#fff}
+.dates{display:grid;gap:0;background:var(--panel)}
+.date{display:grid;grid-template-columns:9em minmax(0,1fr) auto;gap:14px;padding:14px 16px;border-bottom:1px solid var(--rule);align-items:baseline}
+.date .d{font-weight:800;font-size:18px;white-space:nowrap}
+.date .c{font-size:14px;color:var(--mute);white-space:nowrap;text-align:right}
+.date .c.soon{color:var(--brick);font-weight:700}
+.note{font-size:13px;color:var(--mute);max-width:80ch;margin:14px 0 0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;display:none;gap:12px;align-items:center;font-size:15px;z-index:5}
+.toast button{min-height:32px;padding:0 10px;background:transparent;color:var(--bg);border-color:var(--bg)}
+textarea{width:100%;min-height:120px;font:13px/1.4 ui-monospace,monospace;padding:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
+h3{font-size:20px;margin:24px 0 8px}
+.empty{padding:24px;color:var(--mute);background:var(--panel)}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 8px;padding-inline-start:8.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}.date{grid-template-columns:minmax(0,1fr) auto}.date .t{grid-column:1/-1;order:3}.fields{grid-template-columns:minmax(0,1fr) 120px}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band" style="padding-bottom:0"><div class="wrap">
+  <h1 id="headline">Room left for 2026</h1>
+  <p class="sub">TFSA, RRSP and FHSA room for your household, across every bank and brokerage. Your numbers stay on this device — nothing is sent anywhere.</p>
+  <div class="install" id="inst" role="region" aria-label="Install"><span id="instMsg">Add Room Tracker to your home screen to use it like an app, even offline.</span><span style="display:flex;gap:8px"><button type="button" id="instBtn">Install</button><button type="button" class="x" id="instNo">Not now</button></span></div>
+  <nav id="nav">
+    <a href="#room" data-v="room">Room</a>
+    <a href="#log" data-v="log">Contributions</a>
+    <a href="#placement" data-v="placement">Where should it go?</a>
+    <a href="#dates" data-v="dates">Key dates</a>
+    <a href="#data" data-v="data">Backup</a>
+  </nav>
+</div></header>
+
+<main class="band"><div class="wrap">
+  <section class="view" id="v-room">
+    <div class="people" id="people"></div>
+    <div class="toolbar"><button class="ghost" id="addP" type="button">+ Add person</button></div>
+    <p class="note" id="sampleNote">Sample numbers are filled in. Open “Starting numbers” on each card and replace them with the figures from CRA My Account or your Notice of Assessment.</p>
+  </section>
+
+  <section class="view" id="v-log">
+    <form class="form" id="txf">
+      <div><label for="tp">Person</label><select id="tp"></select></div>
+      <div><label for="ta">Account</label><select id="ta"><option>TFSA</option><option>RRSP</option><option>FHSA</option></select></div>
+      <div><label for="tt">Type</label><select id="tt"><option value="c">Contribution</option><option value="w">Withdrawal</option></select></div>
+      <div><label for="tm">Amount ($)</label><input id="tm" class="num" type="number" min="0" step="0.01" inputmode="decimal" required></div>
+      <div><label for="td">Date</label><input id="td" type="date" required></div>
+      <div><label for="ti">Where</label><select id="ti"><option>Questrade</option><option>TD</option><option>RBC</option><option>iA</option><option>Wealthsimple</option><option>Other</option></select></div>
+      <div><button type="submit">Add</button></div>
+    </form>
+    <div id="txlist" style="margin-top:18px"></div>
+  </section>
+
+  <section class="view" id="v-placement">
+    <p style="margin-top:0;max-width:70ch">General rules of thumb for which account suits each kind of investment. They depend on your tax bracket and goals, so treat them as a starting point, not tax advice.</p>
+    <table class="stack" id="ptable"></table>
+  </section>
+
+  <section class="view" id="v-dates">
+    <div class="dates" id="dlist"></div>
+    <p class="note">The 2027 TFSA limit is expected to be $7,500 but CRA had not confirmed it at the time this was built. RRSP 2027 limit of $35,390 is confirmed by CRA.</p>
+  </section>
+
+  <section class="view" id="v-data">
+    <p style="margin-top:0;max-width:70ch">Your numbers live only in this browser. Copy a backup to keep somewhere safe, or paste one to restore it on another device.</p>
+    <div class="toolbar"><button id="copyB" type="button">Copy backup</button><button class="ghost" id="restB" type="button">Restore from pasted backup</button><button class="ghost" id="resetB" type="button">Reset to sample</button></div>
+    <textarea id="bk" aria-label="Backup data" placeholder="Paste a backup here, then press Restore"></textarea>
+  </section>
+
+  <p class="note">2026 limits: TFSA $7,000 · RRSP 18% of 2025 earned income up to $33,810 · FHSA $8,000 a year, $40,000 lifetime. Over-contributions to a TFSA or FHSA cost 1% a month on the excess; RRSP allows a $2,000 buffer before the 1% tax applies.</p>
+</div></main>
+
+<div class="toast" id="toast" role="status"><span id="tmsg"></span><button id="undo" type="button">Undo</button></div>
+
+<script>
+{
+const Y=2026, TFSA_NEXT=7500, RRSP_START='2026-03-03', RRSP_END='2027-03-01', FHSA_YR=8000, FHSA_LIFE=40000;
+const $=s=>document.querySelector(s);
+const fmt=v=>(v<0?'−':'')+'$'+Math.abs(Math.round(v)).toLocaleString('en-CA');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const KEY='roomtracker.v1';
+
+const sample=()=>({sample:true,people:[
+  {id:'p1',name:'You',tfsaJan1:22500,rrspLimit:31200,fhsa:false,fhsaJan1:0,fhsaLife:0},
+  {id:'p2',name:'Spouse',tfsaJan1:18000,rrspLimit:14800,fhsa:true,fhsaJan1:16000,fhsaLife:8000}],
+ tx:[
+  {id:uid(),pid:'p1',a:'TFSA',t:'c',amt:7000,d:'2026-01-06',i:'Questrade'},
+  {id:uid(),pid:'p1',a:'TFSA',t:'c',amt:5000,d:'2026-04-15',i:'TD'},
+  {id:uid(),pid:'p1',a:'TFSA',t:'w',amt:3000,d:'2026-06-02',i:'TD'},
+  {id:uid(),pid:'p1',a:'TFSA',t:'c',amt:9000,d:'2026-09-10',i:'RBC'},
+  {id:uid(),pid:'p1',a:'RRSP',t:'c',amt:12000,d:'2026-03-20',i:'Questrade'},
+  {id:uid(),pid:'p2',a:'TFSA',t:'c',amt:6000,d:'2026-02-11',i:'Questrade'},
+  {id:uid(),pid:'p2',a:'RRSP',t:'c',amt:5000,d:'2026-02-20',i:'Questrade'},
+  {id:uid(),pid:'p2',a:'FHSA',t:'c',amt:8000,d:'2026-05-01',i:'RBC'}]});
+
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!Array.isArray(S.people))S=sample();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+function calc(p){
+  const mine=S.tx.filter(t=>t.pid===p.id);
+  const sum=(f)=>mine.filter(f).reduce((s,t)=>s+(+t.amt||0),0);
+  const byInst=(a,f)=>{const m={};mine.filter(t=>t.a===a&&f(t)).forEach(t=>m[t.i]=(m[t.i]||0)+(+t.amt||0));return m};
+  const inY=t=>t.d&&t.d.startsWith(Y+'');
+  const tC=sum(t=>t.a==='TFSA'&&t.t==='c'&&inY(t)), tW=sum(t=>t.a==='TFSA'&&t.t==='w'&&inY(t));
+  const rIn=t=>t.d>=RRSP_START&&t.d<=RRSP_END;
+  const rC=sum(t=>t.a==='RRSP'&&t.t==='c'&&rIn(t)), rEarly=sum(t=>t.a==='RRSP'&&t.t==='c'&&t.d>=Y+'-01-01'&&t.d<RRSP_START);
+  const fC=sum(t=>t.a==='FHSA'&&t.t==='c'&&inY(t));
+  return {
+    tfsa:{room:+p.tfsaJan1||0,used:tC,left:(+p.tfsaJan1||0)-tC,wd:tW,next:(+p.tfsaJan1||0)-tC+tW+TFSA_NEXT,inst:byInst('TFSA',t=>t.t==='c'&&inY(t))},
+    rrsp:{room:+p.rrspLimit||0,used:rC,left:(+p.rrspLimit||0)-rC,early:rEarly,inst:byInst('RRSP',t=>t.t==='c'&&rIn(t))},
+    fhsa:{room:+p.fhsaJan1||0,used:fC,left:(+p.fhsaJan1||0)-fC,life:FHSA_LIFE-(+p.fhsaLife||0)-fC,inst:byInst('FHSA',t=>t.t==='c'&&inY(t))}
+  };
+}
+
+const meter=(used,room)=>{const over=used>room;const w=room>0?Math.min(100,used/room*100):(used>0?100:0);return `<div class="meter" role="img" aria-label="${fmt(used)} of ${fmt(room)} used"><i class="${over?'bad':''}" style="width:${w.toFixed(1)}%"></i></div>`};
+const insts=m=>{const k=Object.keys(m);return k.length?`<div class="insts">${k.map(x=>`<span>${esc(x)} <b>${fmt(m[x])}</b></span>`).join('')}</div>`:''};
+
+function acctBlock(name,c,extra){
+  const bad=c.left<0;
+  return `<div class="acct"><div class="row"><span class="an">${name}</span><span class="left ${bad?'bad':''}">${bad?'Over by '+fmt(-c.left):fmt(c.left)+' left'}</span></div>
+  ${meter(c.used,c.room)}<div class="det">Used <b>${fmt(c.used)}</b> of <b>${fmt(c.room)}</b></div>${insts(c.inst)}${extra||''}</div>`;
+}
+
+function renderRoom(){
+  let total=0;
+  $('#people').innerHTML=S.people.map(p=>{
+    const c=calc(p);
+    total+=Math.max(0,c.tfsa.left)+Math.max(0,c.rrsp.left)+(p.fhsa?Math.max(0,c.fhsa.left):0);
+    const tExtra=(c.tfsa.left<0?`<div class="warn">Withdraw ${fmt(-c.tfsa.left)} now — CRA charges 1% a month on the excess. Withdrawals don't free up room until next January.</div>`:'')
+      +`<div class="det" style="margin-top:4px">${c.tfsa.wd?`Withdrew <b>${fmt(c.tfsa.wd)}</b> this year — it comes back as room on Jan 1. `:''}Room on Jan 1, 2027: <b>${fmt(c.tfsa.next)}</b> <span title="Assumes the expected $7,500 limit">(est.)</span></div>`;
+    const over=-c.rrsp.left;
+    const rExtra=(over>2000?`<div class="warn">More than $2,000 over — 1% a month tax applies on ${fmt(over-2000)}.</div>`:over>0?`<div class="warn" style="color:var(--mute)">Within the $2,000 over-contribution buffer, but not deductible.</div>`:'')
+      +`<div class="det" style="margin-top:4px">Counts contributions from Mar 3, 2026 to the Mar 1, 2027 deadline.${c.rrsp.early?` ${fmt(c.rrsp.early)} made Jan–Mar 2 2026 counted toward 2025.`:''}</div>`;
+    const fExtra=p.fhsa?(c.fhsa.left<0?`<div class="warn">Over by ${fmt(-c.fhsa.left)} — 1% a month on the excess.</div>`:'')+`<div class="det" style="margin-top:4px">Lifetime room left: <b>${fmt(c.fhsa.life)}</b> of $40,000 · contribute by Dec 31</div>`:'';
+    return `<article class="card" data-p="${p.id}">
+      <h2><input value="${esc(p.name)}" data-f="name" aria-label="Person's name"></h2>
+      ${acctBlock('TFSA',c.tfsa,tExtra)}
+      ${acctBlock('RRSP',c.rrsp,rExtra)}
+      ${p.fhsa?acctBlock('FHSA',c.fhsa,fExtra):''}
+      <details class="set"><summary>Starting numbers</summary>
+        <div class="fields">
+          <label for="a${p.id}">TFSA room on Jan 1, 2026 (CRA My Account)</label><input id="a${p.id}" class="num" type="number" inputmode="numeric" data-f="tfsaJan1" value="${p.tfsaJan1}">
+          <label for="b${p.id}">RRSP deduction limit for 2026 (Notice of Assessment)</label><input id="b${p.id}" class="num" type="number" inputmode="numeric" data-f="rrspLimit" value="${p.rrspLimit}">
+          <label for="c${p.id}">Has an FHSA</label><select id="c${p.id}" data-f="fhsa"><option value="1" ${p.fhsa?'selected':''}>Yes</option><option value="0" ${p.fhsa?'':'selected'}>No</option></select>
+          ${p.fhsa?`<label for="d${p.id}">FHSA room on Jan 1, 2026</label><input id="d${p.id}" class="num" type="number" inputmode="numeric" data-f="fhsaJan1" value="${p.fhsaJan1}">
+          <label for="e${p.id}">FHSA contributed before 2026</label><input id="e${p.id}" class="num" type="number" inputmode="numeric" data-f="fhsaLife" value="${p.fhsaLife}">`:''}
+        </div>
+        ${S.people.length>1?`<button class="x" type="button" data-del="${p.id}" style="margin-top:10px">Remove ${esc(p.name)}</button>`:''}
+      </details>
+    </article>`}).join('');
+  $('#headline').textContent=`${fmt(total)} of room left for 2026`;
+  $('#sampleNote').style.display=S.sample?'':'none';
+}
+
+function renderLog(){
+  $('#tp').innerHTML=S.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  const name=id=>S.people.find(p=>p.id===id)?.name||'—';
+  const rows=[...S.tx].sort((a,b)=>b.d.localeCompare(a.d));
+  $('#txlist').innerHTML=rows.length?`<table class="stack"><thead><tr><th>Date</th><th>Person</th><th>Account</th><th>Where</th><th class="num">Amount</th><th></th></tr></thead><tbody>
+  ${rows.map(t=>`<tr><td style="white-space:nowrap">${esc(t.d)}</td><td>${esc(name(t.pid))}</td><td>${esc(t.a)}</td><td>${esc(t.i)}</td><td class="num ${t.t==='w'?'neg':''}">${t.t==='w'?'Withdrew ':''}${fmt(+t.amt)}</td><td style="text-align:right"><button class="x" type="button" data-rm="${t.id}" aria-label="Delete">Delete</button></td></tr>`).join('')}</tbody></table>`
+  :`<div class="empty">No contributions logged yet. Add one above each time you move money into a TFSA, RRSP or FHSA, at any institution.</div>`;
+}
+
+const P=[
+ ['Growth stocks and equity ETFs (e.g. XEQT, VFV)','best','okay','best','okay','Gains are never taxed in a TFSA, and big winners are where that matters most.'],
+ ['US-listed ETFs that pay dividends (e.g. VOO, SCHD)','avoid','best','avoid','okay','The Canada–US tax treaty waives the 15% US withholding tax in an RRSP. In a TFSA or FHSA it is lost.'],
+ ['Canadian-listed ETFs holding US stocks (e.g. VFV, ZSP)','okay','okay','okay','okay','The 15% withholding happens inside the fund and is lost in any registered account; low dividends keep the drag small.'],
+ ['Canadian dividend stocks and ETFs (e.g. XEI, VDY)','best','okay','okay','best','Eligible Canadian dividends get the dividend tax credit in a taxable account, so they are efficient there too.'],
+ ['Bonds, GICs, high-interest savings','okay','best','okay','avoid','Interest is taxed at your full rate outside a registered account, so shelter it first.'],
+ ['REITs','best','best','okay','avoid','REIT payouts are mostly taxed as income, so keep them sheltered.'],
+ ['Crypto ETFs (e.g. BTCC, ETHX)','best','okay','avoid','okay','Speculative growth suits a TFSA; avoid putting a house down payment at that much risk.'],
+ ['Money for a first home in the next few years','okay','avoid','best','avoid','FHSA gives a deduction going in and tax-free out for a qualifying home; use it before the RRSP Home Buyers’ Plan.'],
+];
+const L={best:'Best',okay:'Fine',avoid:'Avoid'};
+function renderPlacement(){
+  $('#ptable').innerHTML=`<thead><tr><th>Investment</th><th>TFSA</th><th>RRSP</th><th>FHSA</th><th>Taxable</th><th>Why</th></tr></thead><tbody>${P.map(r=>`<tr><td><b>${esc(r[0])}</b></td>${[1,2,3,4].map(i=>`<td><span class="tag ${r[i]}">${L[r[i]]}</span></td>`).join('')}<td style="font-size:14px">${esc(r[5])}</td></tr>`).join('')}</tbody>`;
+}
+
+const D=[
+ ['2026-12-31','Last day for 2026 FHSA contributions','FHSA has no 60-day grace period. Also the last day for a TFSA withdrawal to come back as room in 2027.'],
+ ['2027-01-01','New TFSA room arrives','Expected $7,500 for 2027, plus anything you withdrew during 2026. FHSA gets another $8,000.'],
+ ['2027-03-01','RRSP deadline for the 2026 tax year','Contributions up to this date can be deducted on your 2026 return.'],
+ ['2027-04-30','Tax filing deadline','Your Notice of Assessment will show your 2027 RRSP limit (up to $35,390).'],
+];
+function renderDates(){
+  const now=new Date();now.setHours(0,0,0,0);
+  $('#dlist').innerHTML=D.map(([d,t,n])=>{const dt=new Date(d+'T00:00');const days=Math.round((dt-now)/864e5);
+    return `<div class="date"><div class="d">${dt.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})}</div><div class="t"><b>${esc(t)}</b><div class="det">${esc(n)}</div></div><div class="c ${days>=0&&days<=45?'soon':''}">${days<0?'passed':days===0?'today':'in '+days+' days'}</div></div>`}).join('');
+}
+
+function renderAll(){renderRoom();renderLog();renderPlacement();renderDates()}
+
+function show(){const v=(location.hash||'#room').slice(1);const ok=['room','log','placement','dates','data'].includes(v)?v:'room';
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+ok));
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===ok));}
+window.addEventListener('hashchange',show);
+
+let toastT=null,undoFn=null;
+function toast(msg,fn){$('#tmsg').textContent=msg;undoFn=fn;$('#undo').style.display=fn?'':'none';$('#toast').style.display='flex';clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').style.display='none',5000)}
+$('#undo').addEventListener('click',()=>{if(undoFn){undoFn();save();renderAll()}$('#toast').style.display='none'});
+
+$('#people').addEventListener('change',e=>{
+  const card=e.target.closest('[data-p]');const f=e.target.dataset.f;if(!card||!f)return;
+  const p=S.people.find(x=>x.id===card.dataset.p);
+  p[f]=f==='name'?e.target.value.trim()||'Person':f==='fhsa'?e.target.value==='1':Math.max(0,+e.target.value||0);
+  if(f!=='name')S.sample=false;
+  save();renderAll();
+});
+$('#people').addEventListener('click',e=>{const id=e.target.dataset.del;if(!id)return;
+  const i=S.people.findIndex(p=>p.id===id),p=S.people[i],tx=S.tx.filter(t=>t.pid===id);
+  S.people.splice(i,1);S.tx=S.tx.filter(t=>t.pid!==id);save();renderAll();
+  toast(`Removed ${p.name}`,()=>{S.people.splice(i,0,p);S.tx.push(...tx)});});
+$('#addP').addEventListener('click',()=>{S.people.push({id:uid(),name:'New person',tfsaJan1:0,rrspLimit:0,fhsa:false,fhsaJan1:0,fhsaLife:0});save();renderAll();
+  const c=[...document.querySelectorAll('.card')].pop();c.querySelector('details').open=true;c.querySelector('h2 input').select();});
+
+$('#td').value=new Date().toISOString().slice(0,10);
+$('#txf').addEventListener('submit',e=>{e.preventDefault();const amt=+$('#tm').value;if(!(amt>0))return;
+  S.tx.push({id:uid(),pid:$('#tp').value,a:$('#ta').value,t:$('#tt').value,amt,d:$('#td').value,i:$('#ti').value});
+  S.sample=false;save();const keep=$('#tp').value;renderAll();$('#tp').value=keep;$('#tm').value='';toast('Added');});
+$('#txlist').addEventListener('click',e=>{const id=e.target.dataset.rm;if(!id)return;
+  const i=S.tx.findIndex(t=>t.id===id),t=S.tx[i];S.tx.splice(i,1);save();renderAll();toast('Deleted',()=>S.tx.splice(i,0,t));});
+
+$('#copyB').addEventListener('click',async()=>{const txt=JSON.stringify(S);$('#bk').value=txt;try{await navigator.clipboard.writeText(txt);toast('Backup copied')}catch(e){$('#bk').select();toast('Select the text below and copy it')}});
+$('#restB').addEventListener('click',()=>{try{const d=JSON.parse($('#bk').value);if(!Array.isArray(d.people)||!Array.isArray(d.tx))throw 0;const old=S;S=d;save();renderAll();toast('Restored',()=>{S=old})}catch(e){toast('That doesn’t look like a backup')}});
+$('#resetB').addEventListener('click',()=>{const old=S;S=sample();save();renderAll();toast('Reset to sample numbers',()=>{S=old})});
+
+renderAll();show();
+
+/* ---- installable app ---- */
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}))}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+let dismissed=false;try{dismissed=localStorage.getItem('rt.instNo')==='1'}catch(e){}
+let deferred=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(!standalone&&!dismissed)$('#inst').classList.add('on')});
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+if(ios&&!standalone&&!dismissed){$('#instMsg').innerHTML='To install on iPhone: tap <b>Share</b> in Safari, then <b>Add to Home Screen</b>.';$('#instBtn').style.display='none';$('#inst').classList.add('on')}
+$('#instBtn').addEventListener('click',async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice.catch(()=>{});deferred=null;$('#inst').classList.remove('on')});
+$('#instNo').addEventListener('click',()=>{$('#inst').classList.remove('on');try{localStorage.setItem('rt.instNo','1')}catch(e){}});
+window.addEventListener('appinstalled',()=>$('#inst').classList.remove('on'));
+}
+</script>
+</body>
+</html>

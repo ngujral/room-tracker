@@ -33,7 +33,7 @@ python3 -m http.server 8080
 1. Push this repo to GitHub.
 2. In Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, pick this repo.
 3. Build settings: framework **None**, build command **empty**, output directory **/**.
-4. Deploy. The app is live at `https://<project>.pages.dev`. Every push to `main` redeploys.
+4. Deploy. The app is live at the project address (now **https://roomleft.ca**). Every push to `main` redeploys.
 5. Optional: add a custom domain under **Custom domains**.
 
 ## Yearly update (every November/December)

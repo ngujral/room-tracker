@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://roomleft.ca/</loc>
-    <lastmod>2026-11-22</lastmod>
-  </url>
+  <url><loc>https://roomleft.ca/</loc><lastmod>2026-11-22</lastmod></url>
+  <url><loc>https://roomleft.ca/tfsa-room-2026</loc><lastmod>2026-11-22</lastmod></url>
+  <url><loc>https://roomleft.ca/rrsp-limit-2026</loc><lastmod>2026-11-22</lastmod></url>
+  <url><loc>https://roomleft.ca/fhsa-room-2026</loc><lastmod>2026-11-22</lastmod></url>
+  <url><loc>https://roomleft.ca/brokerage-fees</loc><lastmod>2026-11-22</lastmod></url>
 </urlset>

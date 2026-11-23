@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TFSA, RRSP &amp; FHSA Contribution Room Tracker (Canada) | Room Tracker</title>
-<meta name="description" content="Free TFSA, RRSP and FHSA contribution room tracker for Canadians. See how much room you and your spouse have left in 2026 across TD, RBC, Questrade, Wealthsimple and more — and avoid CRA over-contribution penalties. No sign-up; data stays on your phone.">
+<title>TFSA, RRSP &amp; FHSA Room Tracker Canada | Roomleft</title>
+<meta name="description" content="Free TFSA, RRSP &amp; FHSA contribution room tracker for Canadians — household-wide, across banks. Your data stays on your device.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="TFSA, RRSP & FHSA Room Tracker — see your room left for 2026">
-<meta property="og:description" content="Track TFSA, RRSP and FHSA contribution room for your household across every bank. Free, private, no sign-up.">
+<meta property="og:title" content="TFSA, RRSP & FHSA Room Tracker Canada | Roomleft">
+<meta property="og:description" content="Free TFSA, RRSP & FHSA contribution room tracker for Canadians — household-wide, across banks. Your data stays on your device.">
 <link rel="canonical" href="https://roomleft.ca/">
 <meta property="og:url" content="https://roomleft.ca/">
 <meta property="og:image" content="https://roomleft.ca/og.png">
@@ -127,6 +127,7 @@ h3{font-size:20px;margin:24px 0 8px}
 .rank .dt{grid-column:2/4;font-size:14px;color:var(--mute)}
 .rank .dt b{color:var(--ink);font-weight:600}
 @media(max-width:600px){.rank li{grid-template-columns:2em minmax(0,1fr) auto;padding:12px}.rank .yr{font-size:19px}.rank .nm{font-size:16px}}
+.guides{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.guides a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;background:var(--panel);border-radius:12px;font-weight:700;text-decoration:none;color:var(--ink)}.guides a:hover{color:var(--brick)}
 .faq{margin-top:36px;border-top:2px solid var(--ink);padding-top:8px;max-width:820px}
 .faq h2{font-size:22px;line-height:1.2;margin:14px 0 8px}
 .faq details{border-bottom:1px solid var(--rule)}
@@ -207,7 +208,7 @@ h3{font-size:20px;margin:24px 0 8px}
       <label class="chk"><input id="bn" type="checkbox"> I use Norbert’s Gambit for large conversions</label>
     </form>
     <ol class="rank" id="blist"></ol>
-    <p class="note">Fees checked November 2026 from brokers’ fee schedules and published comparisons. Banks don’t publish their currency spreads, so those FX figures are typical estimates (marked ~). Estimates count one CAD→USD conversion; converting back costs about the same again. Promotions, account fees on small balances and options pricing aren’t included. Confirm on each broker’s site before switching.</p>
+    <p class="note">Fees checked November 2026 from brokers’ fee schedules and published comparisons. Banks don’t publish their currency spreads, so those FX figures are typical estimates (marked ~). Estimates count one CAD→USD conversion; converting back costs about the same again. Promotions, account fees on small balances and options pricing aren’t included. Confirm on each broker’s site before switching. <a href="/brokerage-fees">Read the full brokerage fee guide</a>.</p>
   </section>
   <section class="view" id="v-dates">
     <div class="dates" id="dlist"></div>
@@ -222,6 +223,7 @@ h3{font-size:20px;margin:24px 0 8px}
 
   <p class="note">2026 limits: TFSA $7,000 · RRSP 18% of 2025 earned income up to $33,810 · FHSA $8,000 a year, $40,000 lifetime. Over-contributions to a TFSA or FHSA cost 1% a month on the excess; RRSP allows a $2,000 buffer before the 1% tax applies.</p>
   <section class="faq" id="faq" aria-labelledby="faqh">
+    <nav class="guides" aria-label="Guides"><a href="/tfsa-room-2026">TFSA room 2026</a><a href="/rrsp-limit-2026">RRSP limit 2026</a><a href="/fhsa-room-2026">FHSA room 2026</a><a href="/brokerage-fees">Brokerage fees</a></nav>
     <h2 id="faqh">TFSA, RRSP and FHSA room: common questions</h2>
     <details class="ra"><summary>Understanding registered accounts</summary>
       <p>Registered accounts are savings and investment accounts the government gives tax breaks to. The four most people use:</p>

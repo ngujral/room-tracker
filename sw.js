@@ -1,6 +1,6 @@
 // Offline support: cache the app shell, serve it when there's no network.
 // Bump VERSION whenever you change index.html so phones pick up the update.
-const VERSION = 'rt-2026-11-22j';
+const VERSION = 'rt-2026-11-22k';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png', '/icons/apple-touch-icon.png'];
 
@@ -21,10 +21,11 @@ self.addEventListener('fetch', e => {
 
   // Pages: network first so updates show up, cache as fallback when offline.
   if (req.mode === 'navigate') {
+    const key = (url.pathname === '/' || url.pathname === '/index.html') ? '/index.html' : url.pathname;
     e.respondWith(fetch(req).then(res => {
-      const copy = res.clone(); caches.open(VERSION).then(c => c.put('/index.html', copy));
+      if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(key, copy)); }
       return res;
-    }).catch(() => caches.match('/index.html')));
+    }).catch(() => caches.match(key).then(hit => hit || caches.match('/index.html'))));
     return;
   }
 

@@ -52,3 +52,9 @@ so installed copies pick up the change.
 ## Disclaimer
 
 General information only, not tax advice. Contribution room should be confirmed with CRA.
+
+## Topic pages (SEO)
+
+`tfsa-room-2026.html`, `rrsp-limit-2026.html`, `fhsa-room-2026.html` and `brokerage-fees.html` are generated —
+edit `tools/gen_pages.py`, then run `python3 tools/gen_pages.py .` from the repo root. Cloudflare serves them
+without the `.html` (e.g. `roomleft.ca/tfsa-room-2026`). Add any new page to `sitemap.xml`.
